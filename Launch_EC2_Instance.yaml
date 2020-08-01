@@ -1,24 +1,32 @@
 ---
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Launch an EC2 Instance
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Launch an EC2 Instance."
 Resources:
   EC2Instance:
-    Type: 'AWS::EC2:Instance'
+    Type: "AWS::EC2:Instance"
     Properties:
-      ImageId: ami-02354e95b39ca8dec
-      InstanceType: t2.micro
-      SubnetId: sunbet-0d3b61dab6b6a9b9e
-      AvailabilityZone: us-east-1b
+      ImageId: "ami-02354e95b39ca8dec"
+      InstanceType: "t2.micro"
+      #SubnetId: "sunbet-0d3b61dab6b6a9b9e"
+      AvailabilityZone: "us-east-1b"
       BlockDeviceMappings:
-        - DeviceName: /dev/xvda
+        - DeviceName: "/dev/xvda"
           Ebs:
-            VolumeType: gp2
-            DeleteOnTerminaction: true
-            VolumeSize: 10
+            VolumeType: "gp2"
+            DeleteOnTerminaction: "true"
+            VolumeSize: "10"
       Tags:
-        - Key: Name
-          Value: 'Jenkins Server'
-        - Key: Tech_Owner
-          Value: 'Balaji Pothula'
-      SecurityGroupIds: [sg-06d20a939b85a984e]
+        - Key: "Name"
+          Value: "Jenkins Server"
+        - Key: "Tech_Owner_Mail"
+          Value: "balaji.pothula@techie.com"
+      #SecurityGroupIds: ["sg-04c99d5bc4ea7c7ea", "sg-06d20a939b85a984e"]
       KeyName: EC2PrivKey
+      DisableApiTermination: "true"
+      InstanceInitiatedShutdownBehavior: "stop"
+      Monitoring: "false"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          GroupSet: ["sg-04c99d5bc4ea7c7ea", "sg-06d20a939b85a984e"]
+          SubnetId: "sunbet-0d3b61dab6b6a9b9e"
