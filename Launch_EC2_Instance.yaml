@@ -1,0 +1,24 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch an EC2 Instance
+Resources:
+  EC2Instance:
+    Type: 'AWS::EC2:Instance'
+    Properties:
+      ImageId: ami-02354e95b39ca8dec
+      InstanceType: t2.micro
+      SubnetId: sunbet-0d3b61dab6b6a9b9e
+      AvailabilityZone: us-east-1b
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            DeleteOnTerminaction: true
+            VolumeSize: 10
+      Tags:
+        - Key: Name
+          Value: 'Jenkins Server'
+        - Key: Tech_Owner
+          Value: 'Balaji Pothula'
+      SecurityGroupIds: [sg-06d20a939b85a984e]
+      KeyName: EC2PrivKey
