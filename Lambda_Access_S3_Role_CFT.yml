@@ -27,6 +27,7 @@ Resources:
               - 'sts:AssumeRole'
       RoleName: !Ref AccessS3RoleParam
       Path: /
+      #PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary'
   S3Policy:
     Type: 'AWS::IAM::ManagedPolicy'
     Properties:
