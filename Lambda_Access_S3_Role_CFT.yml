@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  AccessS3RoleParam:
+    Type: String
+    Description: Name of the role
+    Default: Lambda-Access-S3-Role
+  S3BucketName:
+    Type: String
+    Description: Name of the bucket
+    Default: emp-bucket
+  S3PolicyName:
+    Type: String
+    Description: Name of the S3 policy name
+    Default: S3-Policy
+Resources:
+  LambdaAccessS3Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      RoleName: !Ref AccessS3RoleParam
+      Path: /
+  S3Policy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: !Ref S3PolicyName
+      Description: Policy for S3 access
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: S3Access
+            Effect: Allow
+            Action:
+              - 's3:List*'
+              - 's3:GetObject'
+            Resource:
+              - !Sub 'arn:aws:s3:::*${S3BucketName}*'
+      Roles:
+        - Ref: LambdaAccessS3Role
