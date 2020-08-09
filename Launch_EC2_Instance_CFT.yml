@@ -1,20 +1,53 @@
 ---
-AWSTemplateFormatVersion: "2010-09-09"
-Description: "Launch an EC2 Instance."
+AWSTemplateFormatVersion: 2010-09-09
+Description: Launch an EC2 Instance.
+Parameters:
+  ImageIdParam:
+    Type: String
+    Default: ami-0b44050b2d893d5f7
+    Description: Amazon Machine Image ID
+  InstanceTypeParam:
+    Type: String
+    Default: t2.micro
+    Description: EC2 Instance Type
+  SubnetIdParam:
+    Type: String
+    Default: subnet-cec2ae82
+    Description: Subnet ID
+  AvailabilityZoneParam:
+    Type: String
+    Default: ap-south-1b
+    Description: Availability Zone
+  DeviceNameParam:
+    Type: String
+    Default: /dev/xvda
+    Description: SSD Device Type
+  VolumeTypeParam:
+    Type: String
+    Default: gp2
+    Description: SSD Volume Type
+  DeleteOnTerminactionParam:
+    Type: String
+    Default: true
+    Description: Volume Delete Protection
+  VolumeSizeParam:
+    Type: String
+    Default: 10
+    Description: Volume Size in GB
 Resources:
   EC2Instance:
     Type: "AWS::EC2::Instance"
     Properties:
-      ImageId: "ami-0b44050b2d893d5f7"
-      InstanceType: "t2.micro"
-      #SubnetId: "subnet-cec2ae82"
-      AvailabilityZone: "ap-south-1b"
+      ImageId: !Ref ImageIdParam
+      InstanceType: !Ref InstanceTypeParam
+      #SubnetId: !Ref SubnetIdParam
+      AvailabilityZone: !Ref AvailabilityZoneParam
       BlockDeviceMappings:
-        - DeviceName: "/dev/xvda"
+        - DeviceName: !Ref DeviceNameParam
           Ebs:
-            VolumeType: "gp2"
-            #DeleteOnTerminaction: "true"
-            VolumeSize: "10"
+            VolumeType: !Ref VolumeTypeParam
+            #DeleteOnTerminaction: !Ref DeleteOnTerminactionParam
+            VolumeSize: !Ref VolumeSizeParam
       Tags:
         - Key: "Name"
           Value: "Jenkins Server"
@@ -29,4 +62,4 @@ Resources:
         - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
           GroupSet: ["sg-cc2fcdae"]
-          SubnetId: "subnet-cec2ae82"
+          SubnetId: !Ref SubnetIdParam
