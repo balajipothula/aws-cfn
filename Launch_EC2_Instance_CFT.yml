@@ -4,41 +4,64 @@ Description: Launch an EC2 Instance.
 Parameters:
   ImageIdParam:
     Type: String
-    Default: ami-0b44050b2d893d5f7
     Description: Amazon Machine Image ID
+    Default: ami-052c08d70def0ac62
+    AllowedPattern: "([a-zA-Z0-9-]*)"
+    ConstraintDescription: First three characters must be lower case alphabets following by hyphen and allows only alphanumerics
+    AllowedValues:
+      - ami-098f16afa9edf40be # N. Virginia - us-east-1  - RHEL8
+      - ami-0a54aef4ef3b5f881 # Ohio        - us-east-2  - RHEL8
+      - ami-052c08d70def0ac62 # Mumbai      - ap-south-1 - RHEL8
   InstanceTypeParam:
     Type: String
-    Default: t2.micro
     Description: EC2 Instance Type
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
   SubnetIdParam:
     Type: String
-    Default: subnet-cec2ae82
     Description: Subnet ID
+    Default: subnet-cec2ae82
   AvailabilityZoneParam:
     Type: String
-    Default: ap-south-1b
     Description: Availability Zone
+    Default: ap-south-1b
   DeviceNameParam:
     Type: String
-    Default: /dev/xvda
     Description: SSD Device Type
+    Default: /dev/xvda
   VolumeTypeParam:
     Type: String
-    Default: gp2
     Description: SSD Volume Type
+    Default: gp2
   DeleteOnTerminactionParam:
     Type: String
-    Default: true
     Description: Volume Delete Protection
+    Default: true
   VolumeSizeParam:
     Type: String
-    Default: 10
     Description: Volume Size in GB
+    Default: 10
+  IamInstanceProfileParam:
+    Type: String
+    Description: IAM Instance Profile 
+    Default: EC2-Access-S3-Instance-Profile
+Mappings:
+  AMIs:
+    us-east-1:
+      AMI: ami-098f16afa9edf40be
+    us-east-2:
+      AMI: ami-0a54aef4ef3b5f881
+    ap-south-1:
+      AMI: ami-052c08d70def0ac62
 Resources:
   EC2Instance:
     Type: "AWS::EC2::Instance"
     Properties:
-      ImageId: !Ref ImageIdParam
+      ImageId: !FindInMap [AMIs, !Ref "AWS::Region", AMI]
+      #ImageId: !Ref ImageIdParam
       InstanceType: !Ref InstanceTypeParam
       #SubnetId: !Ref SubnetIdParam
       AvailabilityZone: !Ref AvailabilityZoneParam
@@ -63,3 +86,11 @@ Resources:
           DeviceIndex: "0"
           GroupSet: ["sg-cc2fcdae"]
           SubnetId: !Ref SubnetIdParam
+      IamInstanceProfile: !Ref IamInstanceProfileParam
+Outputs:
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
