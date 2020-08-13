@@ -1,0 +1,74 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create Lambda Function
+Parameters:
+  FunctionNameParam:
+    Type: String
+    Description: Lambda Function Name
+    Default: emp-lambda-function
+    AllowedPattern: "([a-zA-Z0-9-])"
+    ConstraintDescription: Function name alphanumerics
+  RuntimeParam:
+    Type: String
+    Description: Runtime Language
+    Default: python3.8
+    AllowedValues: ["python2.7", "python3.6", "python3.7", "python3.8"]
+  S3BucketParam:
+    Type: String
+    Description: S3 Bucket
+    Default: emp-s3-bucket
+  S3KeyParam:
+    Type: String
+    Description: S3 Object
+    Default: emp.zip
+  HandlerParam:
+    Type: String
+    Description: Main Function
+    Default: emp.lambda_function.lambda_handler
+  MemorySizeParam:
+    Type: Integer
+    Description: Runtime Memory Size
+    Default: 128
+    Allowedvalues: [128, 256, 512, 1024, 2048, 3008]
+    MinValue: 128
+    MaxValue: 3008
+  TimeoutParam:
+    Type: Integer
+    Description: Execution Timeout Seconds
+    Default: 60
+    MinValue: 1
+    MaxValue: 900
+  RoleParam:
+    Type: String
+    Description: IAM Role
+    Default: ""
+Resources:
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Ref FunctionNameParam
+      Runtime: !Ref RuntimeParam
+      Code:
+        S3Bucket: !Ref S3BucketParam
+        S3Key: !Ref S3KeyParam
+      Handler: !Ref HandlerParam
+      MemorySize: !Ref MemorySizeParam
+      Timeout: !Ref TimeoutParam
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/IAMRole"
+      Layers: !If [HasLayerVersion, !Ref Layers, !Ref "AWS::NoValue"]
+      Tags:
+        - Key: "Name"
+          Value: "Emp Lambda Function"
+        - Key: "Tech_Owner_Mail"
+          Value: "balaji.pothula@techie.com"
+Outputs:
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
+  LambdaFunctionName:
+    Description: LambdaFunction
+    Value:
+      Ref: LambdaFunction
