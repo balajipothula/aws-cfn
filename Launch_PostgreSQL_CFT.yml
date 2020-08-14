@@ -1,0 +1,121 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Launch Aurora PostgreSQL Serverless.
+Parameters:
+  AutoPauseParam:
+    Type: String
+    Description: Auto Pause
+    Default: 'false'
+    AllowedValues:
+      - true
+      - false
+  BackupRetentionPeriodParam:
+    Type: String
+    Description: Backup Retention
+    Default: '30'
+    ConstraintDescription: Value must be 1 to 35 days
+  BacktrackWindow:
+    Type: String
+    Description: Backup Retention
+    Default: '0'
+    ConstraintDescription: Value must be 0 to 2,59,200 seconds or 72 hours
+  ClusterName:
+    Type: String
+    Default: "emp-cluster"
+  DatabaseNameParam:
+    Type: String
+    Default: "emp_db"
+  MasterUsernameParam:
+    Type: String
+    Default: "emp"
+  DBType:
+    Type: String
+    Default: 'aurora-postgresql'
+    AllowedValues:
+      - "aurora-postgresql"
+  DBClusterIdentifierParam:
+    Type: String
+    Default: emp-cluster
+  EngineParam:
+    Type: String
+    Default: "aurora-postgresql"   
+  EngineModeParam:
+    Type: String
+    Default: serverless
+  EngineVersionParam:
+    Type: String
+    Default: '10.7'
+  MinCapacityParam:
+    Type: String
+    Default: '2'
+    AllowedValues:
+      - '2'
+      - '4'
+      - '8'
+  MaxCapacityParam:
+    Type: String
+    Default: '4'
+    AllowedValues:
+      - '2'
+      - '4'
+      - '8'
+Resources:
+  SecretsManagerSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: emp-secret
+      GenerateSecretString:
+        ExcludeCharacters: /@"
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Aurora PostgreSQL
+      SubnetIds: ["subnet-09d9276f", "subnet-28505d16", "subnet-619c5840"]
+  Cluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      BackupRetentionPeriod: !Ref BackupRetentionPeriodParam
+      DatabaseName: !Ref DatabaseNameParam
+      DBClusterIdentifier: !Ref DBClusterIdentifierParam
+      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DeletionProtection: false
+      EnableHttpEndpoint: true
+      EnableIAMDatabaseAuthentication: true
+      Engine: !Ref EngineParam
+      EngineMode: !Ref EngineModeParam
+      EngineVersion: !Ref EngineVersionParam
+      MasterUsername: !Ref MasterUsernameParam
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${SecretsManagerSecret}}}"
+      Port: 5432
+      VpcSecurityGroupIds: ["sg-f07482d0"]
+      ScalingConfiguration:
+        AutoPause: !Ref AutoPauseParam
+        MaxCapacity: !Ref MaxCapacityParam
+        MinCapacity: !Ref MinCapacityParam
+      StorageEncrypted: true
+      Tags:
+        - Key: StackName
+          Value: !Sub '${AWS::StackName}'
+  SecretManagerHostNameSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: emp-host-secret
+      SecretString: !GetAtt Cluster.Endpoint.Address
+  AuroraClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Aurora Cluster Group
+      Family: aurora-postgresql10
+      Parameters:
+        tls: "enabled"
+Outputs:
+  Host:
+    Description: Cluster Endpoint Address
+    Value: !GetAtt Cluster.Endpoint.Address
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
