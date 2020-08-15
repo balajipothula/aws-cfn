@@ -14,28 +14,15 @@ Parameters:
     Description: Backup Retention
     Default: '30'
     ConstraintDescription: Value must be 1 to 35 days
-  BacktrackWindow:
-    Type: String
-    Description: Backup Retention
-    Default: '0'
-    ConstraintDescription: Value must be 0 to 2,59,200 seconds or 72 hours
-  ClusterName:
-    Type: String
-    Default: "emp-cluster"
   DatabaseNameParam:
     Type: String
-    Default: "emp_db"
+    Default: "employee"
   MasterUsernameParam:
     Type: String
-    Default: "emp"
-  DBType:
-    Type: String
-    Default: 'aurora-postgresql'
-    AllowedValues:
-      - "aurora-postgresql"
+    Default: "employee"
   DBClusterIdentifierParam:
     Type: String
-    Default: emp-cluster
+    Default: employee
   EngineParam:
     Type: String
     Default: "aurora-postgresql"   
@@ -63,9 +50,16 @@ Resources:
   SecretsManagerSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: emp-secret
+      Name: employee
       GenerateSecretString:
         ExcludeCharacters: /@"
+  AuroraClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Aurora Cluster Group
+      Family: aurora-postgresql10
+      Parameters:
+        timezone: "US/Eastern"
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -81,7 +75,6 @@ Resources:
       DBSubnetGroupName: !Ref DBSubnetGroup
       DeletionProtection: false
       EnableHttpEndpoint: true
-      EnableIAMDatabaseAuthentication: true
       Engine: !Ref EngineParam
       EngineMode: !Ref EngineModeParam
       EngineVersion: !Ref EngineVersionParam
@@ -91,8 +84,8 @@ Resources:
       VpcSecurityGroupIds: ["sg-f07482d0"]
       ScalingConfiguration:
         AutoPause: !Ref AutoPauseParam
-        MaxCapacity: !Ref MaxCapacityParam
         MinCapacity: !Ref MinCapacityParam
+        MaxCapacity: !Ref MaxCapacityParam
       StorageEncrypted: true
       Tags:
         - Key: StackName
@@ -100,15 +93,9 @@ Resources:
   SecretManagerHostNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: emp-host-secret
+      Name: employee-secret
       SecretString: !GetAtt Cluster.Endpoint.Address
-  AuroraClusterParameterGroup:
-    Type: AWS::RDS::DBClusterParameterGroup
-    Properties:
-      Description: Aurora Cluster Group
-      Family: aurora-postgresql10
-      Parameters:
-        tls: "enabled"
+
 Outputs:
   Host:
     Description: Cluster Endpoint Address
