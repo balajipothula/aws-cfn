@@ -87,6 +87,11 @@ Resources:
           GroupSet: ["sg-cc2fcdae"]
           SubnetId: !Ref SubnetIdParam
       IamInstanceProfile: !Ref IamInstanceProfileParam
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum -y update
+          yum -y install jq
 Outputs:
   TemplateVersion:
     Description: Template Version
