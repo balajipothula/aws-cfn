@@ -5,47 +5,65 @@ Parameters:
   AutoPauseParam:
     Type: String
     Description: Auto Pause
-    Default: 'false'
-    AllowedValues:
-      - true
-      - false
+    Default: false
+    AllowedValues: [true, false]
   BackupRetentionPeriodParam:
-    Type: String
-    Description: Backup Retention
-    Default: '30'
+    Type: Number
+    Description: Backup Retention Period
+    Default: 35
+    MinValue: 1
+    MaxValue: 35
     ConstraintDescription: Value must be 1 to 35 days
   DatabaseNameParam:
     Type: String
-    Default: "employee"
-  MasterUsernameParam:
-    Type: String
-    Default: "employee"
+    Description: Database Name
+    Default: employee
   DBClusterIdentifierParam:
     Type: String
+    Description: Database cluster
     Default: employee
   EngineParam:
     Type: String
-    Default: "aurora-postgresql"   
+    Description: Database Engine
+    Default: 'aurora-postgresql'
   EngineModeParam:
     Type: String
     Default: serverless
+    Description: Database Engine Mode
   EngineVersionParam:
     Type: String
+    Description: Database Engine Version
     Default: '10.7'
+  MasterUsernameParam:
+    Type: String
+    Description: Database Master Username
+    Default: employee
+  MasterUserPasswordParam:
+    Type: String
+    Description: Database Master Password
+    Default: 'Employee#2020'
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 16
+    #AllowedPattern: ^[a-zA-Z0-9]*$
+    ConstraintDescription: Database password length must between 8 and 16
+  PortParam:
+    Type: Number
+    Description: PostgreSQL Server Port
+    Default: 5432
+    MinValue: 1024
+    MaxValue: 65536
+    ConstraintDescription: Database server port must between 1024 and 65535
   MinCapacityParam:
-    Type: String
-    Default: '2'
-    AllowedValues:
-      - '2'
-      - '4'
-      - '8'
+    Type: Number
+    Description: Minimum Aurora Capacity
+    Default: 2
+    AllowedValues: [2, 4, 8]
   MaxCapacityParam:
-    Type: String
-    Default: '4'
-    AllowedValues:
-      - '2'
-      - '4'
-      - '8'
+    Type: Number
+    Description: Maximum Aurora Capacity
+    Default: 4
+    AllowedValues: [2, 4, 8]
 Resources:
   SecretsManagerSecret:
     Type: AWS::SecretsManager::Secret
@@ -53,17 +71,17 @@ Resources:
       Name: employee
       GenerateSecretString:
         ExcludeCharacters: /@"
-  AuroraClusterParameterGroup:
+  DBClusterParameterGroup:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
       Description: Aurora Cluster Group
       Family: aurora-postgresql10
       Parameters:
-        timezone: "US/Eastern"
+        timezone: 'US/Eastern'
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Aurora PostgreSQL
+      DBSubnetGroupDescription: Aurora PostgreSQL Subnet Group
       SubnetIds: ["subnet-09d9276f", "subnet-28505d16", "subnet-619c5840"]
   Cluster:
     Type: AWS::RDS::DBCluster
@@ -71,7 +89,7 @@ Resources:
       BackupRetentionPeriod: !Ref BackupRetentionPeriodParam
       DatabaseName: !Ref DatabaseNameParam
       DBClusterIdentifier: !Ref DBClusterIdentifierParam
-      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
+      DBClusterParameterGroupName: !Ref DBClusterParameterGroup
       DBSubnetGroupName: !Ref DBSubnetGroup
       DeletionProtection: false
       EnableHttpEndpoint: true
@@ -79,13 +97,15 @@ Resources:
       EngineMode: !Ref EngineModeParam
       EngineVersion: !Ref EngineVersionParam
       MasterUsername: !Ref MasterUsernameParam
-      MasterUserPassword: !Sub "{{resolve:secretsmanager:${SecretsManagerSecret}}}"
-      Port: 5432
+      MasterUserPassword: !Ref MasterUserPasswordParam
+      #MasterUserPassword: !Sub "{{resolve:secretsmanager:${SecretsManagerSecret}}}"
+      Port: !Ref PortParam
       VpcSecurityGroupIds: ["sg-f07482d0"]
       ScalingConfiguration:
         AutoPause: !Ref AutoPauseParam
         MinCapacity: !Ref MinCapacityParam
         MaxCapacity: !Ref MaxCapacityParam
+        SecondsUntilAutoPause: 1000
       StorageEncrypted: true
       Tags:
         - Key: StackName
@@ -93,16 +113,15 @@ Resources:
   SecretManagerHostNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: employee-secret
+      Name: employee
       SecretString: !GetAtt Cluster.Endpoint.Address
-
 Outputs:
   Host:
     Description: Cluster Endpoint Address
     Value: !GetAtt Cluster.Endpoint.Address
   TemplateVersion:
     Description: Template Version
-    Value: "1.0.1"
+    Value: '1.0.1'
   StackName:
     Description: Stack Name
-    Value: !Sub "${AWS::StackName}"
+    Value: !Sub '${AWS::StackName}'
