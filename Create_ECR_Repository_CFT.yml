@@ -1,0 +1,45 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create ECR(Elastic Container Registry) Repository.
+Parameters:
+  ImageScanningConfigurationParam:
+    Type: String
+    Description: Scan Image on Push
+    Default: false
+    Allowedvalues: [false, true]
+  ImageTagMutabilityParam:
+    Type: String
+    Description: Image Tag Mutability
+    Default: IMMUTABLE
+    Allowedvalues: [IMMUTABLE, MUTABLE]
+  RepositoryNameParam:
+    Type: String
+    Description: ECR Repository Name
+    Default: 'emp-image-repo'
+  OwnerNameKey:
+    Type: String
+    Description: Owner Name
+    Default: OwnerName
+  OwnerNameValue:
+    Type: String
+    Description: Owner Name Value
+    Default: Balaji Pothula
+Resources:
+  CreateECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      ImageScanningConfiguration: { "scanOnPush": "false" }
+      ImageTagMutability: !Ref ImageTagMutabilityParam
+      RepositoryName: !Ref RepositoryNameParam
+      Tags:
+        - Key: StackName
+          Value: !Sub '${AWS::StackName}'
+        - Key: !Ref OwnerNameKey
+          Value: !Ref OwnerNameValue
+Outputs:
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
