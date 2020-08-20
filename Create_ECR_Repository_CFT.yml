@@ -6,12 +6,12 @@ Parameters:
     Type: String
     Description: Scan Image on Push
     Default: false
-    Allowedvalues: [false, true]
+    AllowedValues: [false, true]
   ImageTagMutabilityParam:
     Type: String
     Description: Image Tag Mutability
     Default: IMMUTABLE
-    Allowedvalues: [IMMUTABLE, MUTABLE]
+    AllowedValues: [IMMUTABLE, MUTABLE]
   RepositoryNameParam:
     Type: String
     Description: ECR Repository Name
