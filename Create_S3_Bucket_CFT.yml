@@ -1,0 +1,58 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create S3(Simple Storage Service) Bucket.
+Parameters:
+  AccessControlParam:
+    Type: String
+    Description: Access Control
+    Default: PublicRead
+  BucketEncryptionAlgorithmParam:
+    Type: String
+    Description: Bucket Encryption Algorithm
+    Default: AES256
+  BucketNameParam:
+    Type: String
+    Description: Bucket Name
+    Default: 'simple-storage-bucket'
+  VersioningStatusParam:
+    Type: String
+    Description: Versioning Status
+    Default: Suspended
+    AllowedValues: ['Enabled', 'Suspended']
+  OwnerNameKey:
+    Type: String
+    Description: Owner Name
+    Default: OwnerName
+  OwnerNameValue:
+    Type: String
+    Description: Owner Name Value
+    Default: 'Balaji Pothula'
+Resources:
+  CreateS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: !Ref AccessControlParam
+      BucketEncryption:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: !Ref BucketEncryptionAlgorithmParam
+      BucketNameParam: !Ref BucketNameParam
+      MetricsConfigurations:
+        - Id: EntireBucket
+      VersioningConfiguration:
+        Status: !Ref VersioningStatusParam
+      Tags:
+        - Key: StackName
+          Value: !Sub '${AWS::StackName}'
+        - Key: !Ref OwnerNameKey
+          Value: !Ref OwnerNameValue
+    DeletionPolicy: Retain
+Outputs:
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
+  BucketName:
+    Description: Bucket Name
+    Value: !GetAtt BucketNameParam
