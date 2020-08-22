@@ -5,7 +5,8 @@ Parameters:
   AccessControlParam:
     Type: String
     Description: Access Control
-    Default: PublicRead
+    Default: Private
+    AllowedValues: ['AuthenticatedRead', 'AwsExecRead', 'BucketOwnerFullControl', 'BucketOwnerRead', 'LogDeliveryWrite', 'Private', 'PublicRead', 'PublicReadWrite']
   BucketEncryptionAlgorithmParam:
     Type: String
     Description: Bucket Encryption Algorithm
@@ -13,7 +14,7 @@ Parameters:
   BucketNameParam:
     Type: String
     Description: Bucket Name
-    Default: 'simple-storage-bucket'
+    Default: 'simple-storage-bucket-abcde'
   VersioningStatusParam:
     Type: String
     Description: Versioning Status
@@ -33,9 +34,10 @@ Resources:
     Properties:
       AccessControl: !Ref AccessControlParam
       BucketEncryption:
-        - ServerSideEncryptionByDefault:
-            SSEAlgorithm: !Ref BucketEncryptionAlgorithmParam
-      BucketNameParam: !Ref BucketNameParam
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: !Ref BucketEncryptionAlgorithmParam
+      BucketName: !Ref BucketNameParam
       MetricsConfigurations:
         - Id: EntireBucket
       VersioningConfiguration:
@@ -55,4 +57,4 @@ Outputs:
     Value: !Sub "${AWS::StackName}"
   BucketName:
     Description: Bucket Name
-    Value: !GetAtt BucketNameParam
+    Value: !Ref BucketNameParam
