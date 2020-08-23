@@ -84,7 +84,7 @@ Resources:
       MasterUsername: !Ref MasterUsernameParam
       MasterUserPassword: !Ref MasterUserPasswordParam
       PubliclyAccessible: !Ref PubliclyAccessibleParam
-      VPCSecurityGroups: ["sg-12345"]
+      VPCSecurityGroups: ["sg-f07482d0"]
 Outputs:
   TemplateVersion:
     Description: Template Version
