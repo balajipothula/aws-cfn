@@ -63,6 +63,14 @@ Parameters:
     Description: Accessibility
     Default: false
     AllowedValues: [false, true]
+  OwnerNameKey:
+    Type: String
+    Description: Owner Name
+    Default: OwnerName
+  OwnerNameValue:
+    Type: String
+    Description: Owner Name Value
+    Default: Balaji Pothula
 Resources:
   DBSubnetGroup:
     Type: "AWS::RDS::DBSubnetGroup"
@@ -85,6 +93,11 @@ Resources:
       MasterUserPassword: !Ref MasterUserPasswordParam
       PubliclyAccessible: !Ref PubliclyAccessibleParam
       VPCSecurityGroups: ["sg-f07482d0"]
+      Tags:
+        - Key: StackName
+          Value: !Sub '${AWS::StackName}'
+        - Key: !Ref OwnerNameKey
+          Value: !Ref OwnerNameValue      
 Outputs:
   TemplateVersion:
     Description: Template Version
