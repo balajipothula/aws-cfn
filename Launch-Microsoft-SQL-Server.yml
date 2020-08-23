@@ -1,0 +1,97 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Launch Microsoft SQL Server.
+Parameters:
+  AllocatedStorageParam:
+    Type: Number
+    Description: Allocated Storage
+    Default: 20
+    AllowedValues: [20, 40, 80]
+  BackupRetentionPeriodParam:
+    Type: Number
+    Description: Backup Retention Period
+    Default: 35
+    MinValue: 1
+    MaxValue: 35
+    ConstraintDescription: Value must be 1 to 35 days
+  DBInstanceClassParam:
+    Type: String
+    Description: Microsoft SQL Server Instance Type
+    Default: "db.t2.medium"
+    AllowedValues: ["db.t2.medium"]
+  DBInstanceIdentifierParam:
+    Type: String
+    Description: Microsoft SQL Server Identifier
+    Default: mssqlinstance7
+    MinLength: 5
+    MaxLength: 63
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Database Instance Name must contain alphanumeric only, must start with alphabet."
+  DomainIAMRoleNameParam:
+    Type: String
+    Description: Domain IAM Role Name
+    Default: "rds-directoryservice-access-role"
+  EngineParam:
+    Type: String
+    Description: Microsoft SQL Server Engine
+    Default: "sqlserver-ex"
+    AllowedValues: ["sqlserver-ex", "sqlserver-ee"]
+  EngineVersionParam:
+    Type: String
+    Description: Microsoft SQL Server Engine Version
+    Default: "13.00.4466.4.v1"
+    AllowedValues: ["13.00.4466.4.v1"]
+  MasterUsernameParam:
+    Type: String
+    Description: Master Username
+    Default: mssqluser7
+    MinLength: 5
+    MaxLength: 16
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]+"
+    ConstraintDescription: "Master User Name must contain alphanumeric only, must start with alphabet."
+  MasterUserPasswordParam:
+    Type: String
+    Description: Master Username Password
+    Default: Admin123
+    MinLength: 8
+    MaxLength: 16
+    AllowedPattern: "^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)"
+    ConstraintDescription: "Master User Password must alphanumeric, at least one capital letter and one number."
+    NoEcho: true
+  PubliclyAccessibleParam:
+    Type: String
+    Description: Accessibility
+    Default: false
+    AllowedValues: [false, true]
+Resources:
+  DBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Microsoft SQL Server Database Subnet Group"
+      SubnetIds: ["subnet-09d9276f", "subnet-28505d16", "subnet-619c5840"]
+  SQLDatabase:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AllocatedStorage: !Ref AllocatedStorageParam
+      BackupRetentionPeriod: !Ref BackupRetentionPeriodParam
+      DBInstanceClass: !Ref DBInstanceClassParam
+      DBInstanceIdentifier: !Ref DBInstanceIdentifierParam
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      #DomainIAMRoleName: !Ref DomainIAMRoleNameParam
+      Engine: !Ref EngineParam
+      EngineVersion: !Ref EngineVersionParam
+      LicenseModel: license-included
+      MasterUsername: !Ref MasterUsernameParam
+      MasterUserPassword: !Ref MasterUserPasswordParam
+      PubliclyAccessible: !Ref PubliclyAccessibleParam
+      VPCSecurityGroups: ["sg-12345"]
+Outputs:
+  TemplateVersion:
+    Description: Template Version
+    Value: "1.0.1"
+  StackName:
+    Description: Stack Name
+    Value: !Sub "${AWS::StackName}"
+  Host:
+    Description: Cluster Endpoint Address
+    Value: !Sub "${SQLDatabase.Endpoint.Address}:${SQLDatabase.Endpoint.Port}"
