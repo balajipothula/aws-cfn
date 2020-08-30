@@ -66,7 +66,7 @@ Parameters:
     Description: "Security Group Id(s)"
     Default: "sg-f07482d0,sg-f07482d1"
   SubnetIdsParam:
-    Type: "List<AWS::EC2:Subnet::Id>"
+    Type: "List<AWS::EC2::Subnet::Id>"
     Description: Subnet Ids
     Default: "subnet-09d9276f,subnet-28505d16,subnet-619c5840"
   TransitEncryptionEnabledParam:
@@ -99,7 +99,7 @@ Resources:
       Description: ElastiCache Subnet Group
       SubnetIds: !Ref SubnetIdsParam
   CacheCluster:
-    Type: "AWS::ElastiCache::RelicationGroup"
+    Type: "AWS::ElastiCache::ReplicationGroup"
     Properties:
       AtRestEncryptionEnabled: !Ref AtRestEncryptionEnabledParam
       AutomaticFailoverEnabled: !Ref AutomaticFailoverEnabledParam
@@ -124,9 +124,9 @@ Resources:
           Value: !Sub "${AWS::StackName}"
         - Key: !Ref OwnerNameKey
           Value: !Ref OwnerNameValue
-    UpdataPolicy:
+    UpdatePolicy:
       UseOnlineResharding: true
 Outputs:
   StackName:
     Description: Stack Name
-    Value: !Sub "$[AWS::StackName}"
+    Value: !Sub "${AWS::StackName}"
