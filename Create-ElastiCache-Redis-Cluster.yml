@@ -1,0 +1,132 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create ElastiCache Redis Cluster"
+Parameters:
+  AtRestEncryptionEnabledParam:
+    Type: String
+    Description: Rest Encryption
+    Default: true
+    AllowedValues: [false, true]
+  AutomaticFailoverEnabledParam:
+    Type: String
+    Description: Automatic Failover
+    Default: true
+    AllowedValues: [false, true]
+  CacheSubnetGroupNameParam:
+    Type: String
+    Description: Cache Subnet Group Name
+    Default: "emp-cache-subnet-group"
+  CacheNodeTypeParam:
+    Type: String
+    Description: Cache Node Type
+    Default: cache.t2.micro
+    AllowedValues: [cache.t2.micro, cache.t2.small, cache.t2.medium]
+  CacheParameterGroupNameParam:
+    Type: String
+  EngineParam:
+    Type: String
+    Description: ElastiCache Engine
+    Default: redis
+  EngineVersionParam:
+    Type: String
+    Description: "ElastiCache Engine Version"
+    Default: "5.0.6"
+    AllowedValues: ["5.0.6"]
+  NumCacheClustersParam:
+    Type: Number
+    Description: Number of Cache Nodes
+    Default: 3
+    MinValue: 1
+    MaxValue: 6
+  PortParam:
+    Type: Number
+    Description: Redis Port Number
+    Default: 6379
+    MinValue: 1
+    MaxValue: 65535
+  PreferredCacheClusterAZsParam:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Description: EC2 Availability Zones
+    Default: "us-east-1a,us-east-1b"
+  PreferredMaintenanceWindowParam:
+    Type: String
+    Description: Preferred Maintenance Window
+    Default: "sun:23:30-mon:01:30"
+    AllowedPattern: (sun|mon|tue|wed|thu|fri|sat):\d{2}:\d{2}-(sun|mon|tue|wed|thu|fri|sat):\d{2}:\d{2}
+  ReplicationGroupDescriptionParam:
+    Type: String
+    Description: Emp Redis Cluster
+    Default: "Emp Redis Cluster"
+  ReplicationGroupIdParam:
+    Type: String
+    Description: Name of the Cluster
+    Default: "emp-redis-cache"
+  SecurityGroupIdsParam:
+    Type: "List<AWS::EC2::SecurityGroup::Id>"
+    Description: "Security Group Id(s)"
+    Default: "sg-f07482d0,sg-f07482d1"
+  SubnetIdsParam:
+    Type: "List<AWS::EC2:Subnet::Id>"
+    Description: Subnet Ids
+    Default: "subnet-09d9276f,subnet-28505d16,subnet-619c5840"
+  TransitEncryptionEnabledParam:
+    Type: String
+    Description: Transit Encryption
+    Default: true
+    AllowedValues: [false, true]
+  Name:
+    Type: String
+    Default: "emp-redis-cache"
+    Description: "Name of the resource"
+  OwnerNameKey:
+    Type: String
+    Description: Owner Name Key
+    Default: OwnerName
+  OwnerNameValue:
+    Type: String
+    Description: Owner Name Value
+    Default: "Balaji Pothula"
+Conditions:
+  IsCacheParameterGroupNameEnabled: !Not
+    - !Equals
+      - !Ref CacheParameterGroupNameParam
+      - ""
+Resources:
+  CacheSubnetGroup:
+    Type: "AWS::ElastiCache::SubnetGroup"
+    Properties:
+      CacheSubnetGroupName: !Ref CacheSubnetGroupNameParam
+      Description: ElastiCache Subnet Group
+      SubnetIds: !Ref SubnetIdsParam
+  CacheCluster:
+    Type: "AWS::ElastiCache::RelicationGroup"
+    Properties:
+      AtRestEncryptionEnabled: !Ref AtRestEncryptionEnabledParam
+      AutomaticFailoverEnabled: !Ref AutomaticFailoverEnabledParam
+      TransitEncryptionEnabled: !Ref TransitEncryptionEnabledParam
+      CacheNodeType: !Ref CacheNodeTypeParam
+      CacheParameterGroupName: !If
+        - IsCacheParameterGroupNameEnabled
+        - !Ref CacheParameterGroupNameParam
+        - !Ref "AWS::NoValue"
+      CacheSubnetGroupName: !Ref CacheSubnetGroup
+      Engine: !Ref EngineParam
+      EngineVersion: !Ref EngineVersionParam
+      NumCacheClusters: !Ref NumCacheClustersParam
+      Port: !Ref PortParam
+      PreferredCacheClusterAZs: !Ref PreferredCacheClusterAZsParam
+      PreferredMaintenanceWindow: !Ref PreferredMaintenanceWindowParam
+      ReplicationGroupDescription: !Ref ReplicationGroupDescriptionParam
+      ReplicationGroupId: !Ref ReplicationGroupIdParam
+      SecurityGroupIds: !Ref SecurityGroupIdsParam
+      Tags:
+        - Key: StackName
+          Value: !Sub "${AWS::StackName}"
+        - Key: !Ref OwnerNameKey
+          Value: !Ref OwnerNameValue
+    UpdataPolicy:
+      UseOnlineResharding: true
+Outputs:
+  StackName:
+    Description: Stack Name
+    Value: !Sub "$[AWS::StackName}"
