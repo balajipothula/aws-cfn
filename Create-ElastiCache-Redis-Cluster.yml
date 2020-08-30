@@ -35,9 +35,10 @@ Parameters:
   NumCacheClustersParam:
     Type: Number
     Description: Number of Cache Nodes
-    Default: 3
+    Default: 2
     MinValue: 1
     MaxValue: 6
+    ConstraintDescription: "No. of Cache Nodes = No. of Availability Zones"
   PortParam:
     Type: Number
     Description: Redis Port Number
